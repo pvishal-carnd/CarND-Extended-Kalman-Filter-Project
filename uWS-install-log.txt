@@ -1,0 +1,15 @@
+
+-- Install configuration: ""
+-- Installing: /usr/lib64/libuWS.so
+-- Installing: /usr/include/uWS/Extensions.h
+-- Installing: /usr/include/uWS/WebSocketProtocol.h
+-- Installing: /usr/include/uWS/Networking.h
+-- Installing: /usr/include/uWS/WebSocket.h
+-- Installing: /usr/include/uWS/Hub.h
+-- Installing: /usr/include/uWS/Group.h
+-- Installing: /usr/include/uWS/Node.h
+-- Installing: /usr/include/uWS/Socket.h
+-- Installing: /usr/include/uWS/HTTPSocket.h
+-- Installing: /usr/include/uWS/uWS.h
+-- Installing: /usr/include/uWS/uUV.h
+-- sudo ln -s /usr/lib64/libuWS.so /usr/lib/libuWS.so
