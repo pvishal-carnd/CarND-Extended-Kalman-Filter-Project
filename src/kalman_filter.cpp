@@ -1,12 +1,10 @@
 #include "kalman_filter.h"
-#include<cmath>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 // Please note that the Eigen library does not initialize
 // VectorXd or MatrixXd objects with zeros upon creation.
-#define PI 3.141592653589793
 
 KalmanFilter::KalmanFilter() {}
 
@@ -47,20 +45,20 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     double theta = atan2(x_(1),  x_(0));
     double rho_dot = (x_(0)*x_(2) + x_(1)*x_(3)) / rho;
 
-    //if(theta > PI){
-    //    theta -= 2*PI;
-    //}
-    //else if(theta < -PI){
-    //    theta += 2*PI;
-    //}
-
     VectorXd h = VectorXd(3); // h(x_)
     h << rho, theta, rho_dot;
 
     VectorXd y = z - h;
 
+    y(1) = NormalizeAngle_(y(1));
+    //if(y(1) > PI){
+    //    y(1) -= 2*PI;
+    //}
+    //else if(y(1) < -PI){
+    //    y(1) += 2*PI;
+    //}
+
     Update_(y);
-    //std::cout<<theta<<endl;
 }
 
 void KalmanFilter::Update_(const VectorXd &y){
@@ -75,3 +73,11 @@ void KalmanFilter::Update_(const VectorXd &y){
     P_ = (I - K * H_) * P_;
 }
 
+#define PI 3.141592653589793
+double KalmanFilter::NormalizeAngle_(double theta){
+
+    if(theta > PI) theta -= 2*PI;
+    else if(theta < -PI) theta += 2*PI;
+
+    return theta;
+}

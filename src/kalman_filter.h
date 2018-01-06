@@ -71,6 +71,11 @@ private:
    * @param y The measurement error at k+1
    */
   void Update_(const Eigen::VectorXd &y);
+
+  /**
+   * A helper method to normalize angles to [-pi, pi]
+   */
+  double NormalizeAngle_(double theta);
 };
 
 #endif /* KALMAN_FILTER_H_ */

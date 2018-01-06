@@ -19,8 +19,6 @@ FusionEKF::FusionEKF() {
     previous_timestamp_ = 0;
 
     // initializing matrices
-    R_laser_ = MatrixXd(2, 2);
-    R_radar_ = MatrixXd(3, 3);
     H_laser_ = MatrixXd(2, 4);
     H_laser_ << 1, 0, 0, 0,
                 0, 1, 0, 0;
@@ -28,10 +26,12 @@ FusionEKF::FusionEKF() {
     Hj_ = MatrixXd(3, 4);
 
     //measurement covariance matrix - laser
+    R_laser_ = MatrixXd(2, 2);
     R_laser_ << 0.0225, 0,
                 0, 0.0225;
 
     //measurement covariance matrix - radar
+    R_radar_ = MatrixXd(3, 3);
     R_radar_ << 0.09, 0, 0,
                 0, 0.0009, 0,
                 0, 0, 0.09;
@@ -101,7 +101,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                    0, 0, 0, 1000;
 
         // Print the initialization results
-        cout << "EKF init: " << ekf_.x_ << endl;
+        //cout << "EKF init: " << ekf_.x_ << endl;
 
         // Save the initiall timestamp for dt calculation
         previous_timestamp_ = measurement_pack.timestamp_;
