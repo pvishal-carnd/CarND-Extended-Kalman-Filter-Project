@@ -33,7 +33,7 @@ void KalmanFilter::Update(const VectorXd &z) {
     /**
     * update the state by using Kalman Filter equations
     */
-    VectorXd y = z - H_ * x_; // error calculation
+    VectorXd y = z - H_ * x_;
     Update_(y);
 }
 
@@ -49,24 +49,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     h << rho, theta, rho_dot;
 
     VectorXd y = z - h;
-
     y(1) = NormalizeAngle_(y(1));
-    //if(y(1) > PI){
-    //    y(1) -= 2*PI;
-    //}
-    //else if(y(1) < -PI){
-    //    y(1) += 2*PI;
-    //}
 
     Update_(y);
 }
 
 void KalmanFilter::Update_(const VectorXd &y){
+    // Precompute matrices involved
     MatrixXd Ht = H_.transpose();
     MatrixXd S = H_ * P_ * Ht + R_;
     MatrixXd Si = S.inverse();
     MatrixXd K =  P_ * Ht * Si;
-    // New state
+
+    // Update the state
     x_ = x_ + (K * y);
     int x_size = x_.size();
     MatrixXd I = MatrixXd::Identity(x_size, x_size);

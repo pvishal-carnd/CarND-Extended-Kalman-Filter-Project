@@ -8,7 +8,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::vector;
 
-#define EPS 0.0001
+#define EPS 0.0000001
 
 /*
  * Constructor.
@@ -36,13 +36,14 @@ FusionEKF::FusionEKF() {
                 0, 0.0009, 0,
                 0, 0, 0.09;
 
-    /**
-     TODO:
-     * Finish initializing the FusionEKF.
-     * Set the process and measurement noises
-     */
+    P_initial_ = MatrixXd(4, 4);
+    P_initial_ << 1, 0, 0   , 0,
+                  0, 1, 0   , 0,
+                  0, 0, 1000, 0,
+                  0, 0, 0, 1000;
 
-
+    noise_ax_ = 9.0;
+    noise_ay_ = 9.0;
 }
 
 /**
@@ -64,9 +65,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
          * Remember: you'll need to convert radar from polar to cartesian coordinates.
          */
         // first measurement
-        cout << "EKF: " << endl;
         ekf_.x_ = VectorXd(4);
-        //ekf_.x_ << 1, 1, 1, 1;
 
         if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
             /**
@@ -94,14 +93,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
             ekf_.x_(1) = EPS;
         }
         // Initial covariance matrix
-        ekf_.P_ = MatrixXd(4, 4);
-        ekf_.P_ << 1, 0, 0   , 0,
-                   0, 1, 0   , 0,
-                   0, 0, 1000, 0,
-                   0, 0, 0, 1000;
+        ekf_.P_ = P_initial_;
 
-        // Print the initialization results
-        //cout << "EKF init: " << ekf_.x_ << endl;
+        // Initialize the state transition matrix
+        ekf_.F_ = MatrixXd(4, 4);
+        ekf_.F_ << 1, 0, 1, 0,
+                   0, 1, 0, 1,
+                   0, 0, 1, 0,
+                   0, 0, 0, 1;
 
         // Save the initiall timestamp for dt calculation
         previous_timestamp_ = measurement_pack.timestamp_;
@@ -116,38 +115,28 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      ****************************************************************************/
 
     /**
-     TODO:
      * Update the state transition matrix F according to the new elapsed time.
      - Time is measured in seconds.
      * Update the process noise covariance matrix.
-     * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
      */
     float dt = (measurement_pack.timestamp_ - previous_timestamp_);
     dt /= 1000000.0; // convert micros to s
     previous_timestamp_ = measurement_pack.timestamp_;
 
     // State transition matrix update
-    ekf_.F_ = MatrixXd(4, 4);
-    ekf_.F_ << 1, 0, dt, 0,
-               0, 1, 0, dt,
-               0, 0, 1, 0,
-               0, 0, 0, 1;
+    ekf_.F_(0,2) = dt;
+    ekf_.F_(1,3) = dt;
 
     // Noise covariance matrix computation
-    // Noise values from the task
-    float noise_ax = 9.0;
-    float noise_ay = 9.0;
-    // Precompute some usefull values to speed up calculations of Q
     float dt_2 = dt * dt; //dt^2
     float dt_3 = dt_2 * dt; //dt^3
     float dt_4 = dt_3 * dt; //dt^4
-    float dt_4_4 = dt_4 / 4; //dt^4/4
-    float dt_3_2 = dt_3 / 2; //dt^3/2
+
     ekf_.Q_ = MatrixXd(4, 4);
-    ekf_.Q_ << dt_4_4 * noise_ax, 0, dt_3_2 * noise_ax, 0,
-               0, dt_4_4 * noise_ay, 0, dt_3_2 * noise_ay,
-               dt_3_2 * noise_ax, 0,   dt_2 * noise_ax, 0,
-               0, dt_3_2 * noise_ay, 0, dt_2 * noise_ay;
+    ekf_.Q_ << dt_4 * noise_ax_/4, 0, dt_3 * noise_ax_/2, 0,
+               0, dt_4 * noise_ay_/4, 0, dt_3 * noise_ay_/2,
+               dt_3 * noise_ax_/2, 0, dt_2 * noise_ax_, 0,
+               0, dt_3 * noise_ay_/2, 0, dt_2 * noise_ay_;
 
     ekf_.Predict();
 
