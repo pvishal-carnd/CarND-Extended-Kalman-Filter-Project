@@ -25,17 +25,20 @@ FusionEKF::FusionEKF() {
 
     Hj_ = MatrixXd(3, 4);
 
-    //measurement covariance matrix - laser
+    // measurement covariance matrix - laser
     R_laser_ = MatrixXd(2, 2);
     R_laser_ << 0.0225, 0,
                 0, 0.0225;
 
-    //measurement covariance matrix - radar
+    // measurement covariance matrix - radar
     R_radar_ = MatrixXd(3, 3);
     R_radar_ << 0.09, 0, 0,
                 0, 0.0009, 0,
                 0, 0, 0.09;
 
+    // The initial value of the process covariance.
+    // In the first frame, we are more certain of the positions than we are
+    // about velocities. So we initialize the velocity covariances to high values
     P_initial_ = MatrixXd(4, 4);
     P_initial_ << 1, 0, 0   , 0,
                   0, 1, 0   , 0,
@@ -95,7 +98,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
         // Initial covariance matrix
         ekf_.P_ = P_initial_;
 
-        // Initialize the state transition matrix
+        // Initialize the state transition matrix. We initialize dt to 1 and update it later
         ekf_.F_ = MatrixXd(4, 4);
         ekf_.F_ << 1, 0, 1, 0,
                    0, 1, 0, 1,
